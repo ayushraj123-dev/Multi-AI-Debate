@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Group Chat</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 650px;
+            margin: auto;
+            background: #f0f0f0;
+        }
+        .chat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 300px;
+            margin-top: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .ai1 { background: #e3f2fd; }
+        .ai2 { background: #f1f8e9; }
+        input {
+            width: 70%;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>AI Group Chat</h1>
+
+    <input type="text" id="topic" placeholder="Enter topic (e.g. Is AI dangerous?)">
+    <button onclick="startDebate()">Start Debate</button>
+
+    <div class="chat-box" id="chat"></div>
+
+    <script>
+        async function startDebate() {
+            const topic = document.getElementById('topic').value.trim();
+            const chat = document.getElementById('chat');
+
+            // 🚫 prevent bad input
+            if (!topic || topic.length < 5) {
+                alert("Enter a proper topic like: Is AI dangerous?");
+                return;
+            }
+
+            chat.innerHTML = "";
+
+            // -------- AI 1 --------
+            chat.innerHTML += `<div class="message"><i>AI 1 is thinking...</i></div>`;
+
+            const controller1 = new AbortController();
+            setTimeout(() => controller1.abort(), 12000); // ⏱️ 12 sec timeout
+
+            let data1;
+
+            try {
+                const res1 = await fetch('/ask_individual', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    signal: controller1.signal,
+                    body: JSON.stringify({
+                        model_id: "openchat/openchat-7b:free",
+                        history: [{
+                            role: "user",
+                            content: `Debate Topic: ${topic}
+Give a strong opinion in 2-3 sentences. No templates.`
+                        }]
+                    })
+                });
+
+                data1 = await res1.json();
+            } catch (err) {
+                chat.innerHTML = `<div class="message">⚠️ AI 1 failed or timed out. Try again.</div>`;
+                return;
+            }
+
+            chat.lastChild.remove();
+            chat.innerHTML += `<div class="message ai1"><b>AI 1:</b> ${data1.reply || "⚠️ No response"}</div>`;
+
+            // -------- AI 2 --------
+            chat.innerHTML += `<div class="message"><i>AI 2 is responding...</i></div>`;
+
+            const controller2 = new AbortController();
+            setTimeout(() => controller2.abort(), 12000);
+
+            let data2;
+
+            try {
+                const res2 = await fetch('/ask_individual', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    signal: controller2.signal,
+                    body: JSON.stringify({
+                        model_id: "openchat/openchat-7b:free",
+                        history: [{
+                            role: "user",
+                            content: `Debate Topic: ${topic}
+Opponent said: "${data1.reply}"
+Disagree and counter in 2-3 sentences.`
+                        }]
+                    })
+                });
+
+                data2 = await res2.json();
+            } catch (err) {
+                chat.innerHTML += `<div class="message">⚠️ AI 2 failed or timed out.</div>`;
+                return;
+            }
+
+            chat.lastChild.remove();
+            chat.innerHTML += `<div class="message ai2"><b>AI 2:</b> ${data2.reply || "⚠️ No response"}</div>`;
+        }
+    </script>
+</body>
+</html>

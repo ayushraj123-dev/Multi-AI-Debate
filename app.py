@@ -18,7 +18,7 @@ app = Flask(__name__)
 # 🔑 YOUR OPENROUTER API KEY
 # =========================================================
 
-API_KEY = "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"
+API_KEY = "YOUR OPENROUTER API KEY"
 
 
 # =========================================================

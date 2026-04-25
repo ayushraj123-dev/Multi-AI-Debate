@@ -1,125 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Group Chat</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 650px;
-            margin: auto;
-            background: #f0f0f0;
-        }
-        .chat-box {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            min-height: 300px;
-            margin-top: 20px;
-        }
-        .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .ai1 { background: #e3f2fd; }
-        .ai2 { background: #f1f8e9; }
-        input {
-            width: 70%;
-            padding: 8px;
-        }
-        button {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Debate Arena</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #050816, #0a0f2c, #101b45);
+      color: white;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #7df9ff;
+      text-shadow: 0 0 20px rgba(125, 249, 255, 0.6);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b8c7ff;
+      margin-bottom: 35px;
+      font-size: 16px;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      flex: 1;
+      padding: 18px;
+      border: 1px solid rgba(125, 249, 255, 0.3);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: white;
+      font-size: 16px;
+      outline: none;
+      backdrop-filter: blur(10px);
+    }
+
+    input::placeholder {
+      color: #9fb3ff;
+    }
+
+    button {
+      padding: 18px 28px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #00e5ff, #7c4dff);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 20px rgba(0,229,255,0.25);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0,229,255,0.4);
+    }
+
+    .chat-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 25px;
+      backdrop-filter: blur(14px);
+      min-height: 300px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+
+    .message {
+      background: rgba(255,255,255,0.06);
+      border-left: 4px solid #00e5ff;
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .round {
+      font-size: 14px;
+      color: #7df9ff;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .reply {
+      color: #dfe7ff;
+      white-space: pre-wrap;
+    }
+
+    .judge {
+      border-left: 4px solid #ffd700;
+      background: rgba(255, 215, 0, 0.08);
+    }
+
+    .loading {
+      text-align: center;
+      color: #7df9ff;
+      font-size: 18px;
+      padding: 20px;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>AI Group Chat</h1>
 
-    <input type="text" id="topic" placeholder="Enter topic (e.g. Is AI dangerous?)">
-    <button onclick="startDebate()">Start Debate</button>
+  <div class="container">
+    <div class="title">🔥 AI Debate Arena</div>
+    <div class="subtitle">5 AI Minds • Multi-Round Debate • Final AI Judge 👑</div>
 
-    <div class="chat-box" id="chat"></div>
+    <div class="input-box">
+      <input
+        type="text"
+        id="topic"
+        placeholder="Enter a debate topic (example: Is AI dangerous for humanity?)"
+      />
+      <button onclick="startDebate()">Start Debate</button>
+    </div>
 
-    <script>
-        async function startDebate() {
-            const topic = document.getElementById('topic').value.trim();
-            const chat = document.getElementById('chat');
+    <div class="chat-box" id="chat">
+      
+    </div>
+  </div>
 
-            // 🚫 prevent bad input
-            if (!topic || topic.length < 5) {
-                alert("Enter a proper topic like: Is AI dangerous?");
-                return;
-            }
+  <script>
+    async function startDebate() {
+      const topic = document.getElementById("topic").value.trim();
+      const chat = document.getElementById("chat");
 
-            chat.innerHTML = "";
+      if (!topic) {
+        alert("Please enter a debate topic first.");
+        return;
+      }
 
-            // -------- AI 1 --------
-            chat.innerHTML += `<div class="message"><i>AI 1 is thinking...</i></div>`;
+      chat.innerHTML = `<div class="loading">⚡ AI systems are preparing arguments...</div>`;
 
-            const controller1 = new AbortController();
-            setTimeout(() => controller1.abort(), 12000); // ⏱️ 12 sec timeout
+      try {
+        const response = await fetch("/start_debate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ topic })
+        });
 
-            let data1;
+        const data = await response.json();
 
-            try {
-                const res1 = await fetch('/ask_individual', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    signal: controller1.signal,
-                    body: JSON.stringify({
-                        model_id: "openchat/openchat-7b:free",
-                        history: [{
-                            role: "user",
-                            content: `Debate Topic: ${topic}
-Give a strong opinion in 2-3 sentences. No templates.`
-                        }]
-                    })
-                });
-
-                data1 = await res1.json();
-            } catch (err) {
-                chat.innerHTML = `<div class="message">⚠️ AI 1 failed or timed out. Try again.</div>`;
-                return;
-            }
-
-            chat.lastChild.remove();
-            chat.innerHTML += `<div class="message ai1"><b>AI 1:</b> ${data1.reply || "⚠️ No response"}</div>`;
-
-            // -------- AI 2 --------
-            chat.innerHTML += `<div class="message"><i>AI 2 is responding...</i></div>`;
-
-            const controller2 = new AbortController();
-            setTimeout(() => controller2.abort(), 12000);
-
-            let data2;
-
-            try {
-                const res2 = await fetch('/ask_individual', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    signal: controller2.signal,
-                    body: JSON.stringify({
-                        model_id: "openchat/openchat-7b:free",
-                        history: [{
-                            role: "user",
-                            content: `Debate Topic: ${topic}
-Opponent said: "${data1.reply}"
-Disagree and counter in 2-3 sentences.`
-                        }]
-                    })
-                });
-
-                data2 = await res2.json();
-            } catch (err) {
-                chat.innerHTML += `<div class="message">⚠️ AI 2 failed or timed out.</div>`;
-                return;
-            }
-
-            chat.lastChild.remove();
-            chat.innerHTML += `<div class="message ai2"><b>AI 2:</b> ${data2.reply || "⚠️ No response"}</div>`;
+        if (data.error) {
+          chat.innerHTML = `<div class="message">⚠ ${data.error}</div>`;
+          return;
         }
-    </script>
+
+        chat.innerHTML = "";
+
+        data.responses.forEach(item => {
+          const isJudge = item.name.includes("Judge");
+
+          const div = document.createElement("div");
+          div.className = isJudge ? "message judge" : "message";
+
+          div.innerHTML = `
+            <div class="round">${item.round}</div>
+            <div class="name">${item.name}</div>
+            <div class="reply">${item.reply}</div>
+          `;
+
+          chat.appendChild(div);
+        });
+
+      } catch (error) {
+        chat.innerHTML = `<div class="message">⚠ Failed to start debate</div>`;
+        console.error(error);
+      }
+    }
+  </script>
+
 </body>
 </html>
